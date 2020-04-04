@@ -1,3 +1,4 @@
+let mongoose = require('mongoose');
 var path = require('path');
 var knex = require('knex')({
   client: 'sqlite3',
@@ -6,35 +7,41 @@ var knex = require('knex')({
   },
   useNullAsDefault: true
 });
-var db = require('bookshelf')(knex);
+mongoose.connect('mongodb://localhost:27017/shortly-deploy', { useMongoClient: true })
+let connection = mongoose.connection
 
-db.knex.schema.hasTable('urls').then(function(exists) {
-  if (!exists) {
-    db.knex.schema.createTable('urls', function (link) {
-      link.increments('id').primary();
-      link.string('url', 255);
-      link.string('baseUrl', 255);
-      link.string('code', 100);
-      link.string('title', 255);
-      link.integer('visits');
-      link.timestamps();
-    }).then(function (table) {
-      console.log('Created Table', table);
-    });
-  }
-});
+connection.on('error', console.error.bind(console, 'connection error:'));
+connection.once('open', () => console.log('mongoose is connected'))
 
-db.knex.schema.hasTable('users').then(function(exists) {
-  if (!exists) {
-    db.knex.schema.createTable('users', function (user) {
-      user.increments('id').primary();
-      user.string('username', 100).unique();
-      user.string('password', 100);
-      user.timestamps();
-    }).then(function (table) {
-      console.log('Created Table', table);
-    });
-  }
-});
+// var db = require('bookshelf')(knex);
 
-module.exports = db;
+// db.knex.schema.hasTable('urls').then(function (exists) {
+//   if (!exists) {
+//     db.knex.schema.createTable('urls', function (link) {
+//       link.increments('id').primary();
+//       link.string('url', 255);
+//       link.string('baseUrl', 255);
+//       link.string('code', 100);
+//       link.string('title', 255);
+//       link.integer('visits');
+//       link.timestamps();
+//     }).then(function (table) {
+//       console.log('Created Table', table);
+//     });
+//   }
+// });
+
+// db.knex.schema.hasTable('users').then(function (exists) {
+//   if (!exists) {
+//     db.knex.schema.createTable('users', function (user) {
+//       user.increments('id').primary();
+//       user.string('username', 100).unique();
+//       user.string('password', 100);
+//       user.timestamps();
+//     }).then(function (table) {
+//       console.log('Created Table', table);
+//     });
+//   }
+// });
+
+// module.exports = db;
