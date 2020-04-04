@@ -1,8 +1,13 @@
-module.exports = function(grunt) {
+module.exports = function (grunt) {
 
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     concat: {
+      js: {
+        src: ['public/client/*.js'],
+        dest: 'public/client/build/router.js'
+      }
+
     },
 
     mochaTest: {
@@ -21,15 +26,34 @@ module.exports = function(grunt) {
     },
 
     uglify: {
+      options: {
+        compress: true
+      },
+      applib: {
+        src: [
+          'public/client/*.js'
+        ],
+        dest: 'public/dist/uglifiedRouter.js'
+
+      }
     },
 
     eslint: {
       target: [
         // Add list of files to lint here
+        'public/dist/*.js'
       ]
     },
 
     cssmin: {
+      target: {
+
+        files: {
+          'public/dist/style.min.css': [
+            'public/style.css'
+          ]
+        }
+      }
     },
 
     watch: {
@@ -65,30 +89,48 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-nodemon');
 
   grunt.registerTask('server-dev', function (target) {
-    grunt.task.run([ 'nodemon', 'watch' ]);
+    grunt.task.run(['nodemon', 'watch']);
   });
 
   ////////////////////////////////////////////////////
   // Main grunt tasks
   ////////////////////////////////////////////////////
 
+  grunt.registerTask('eslint-js', [
+    'eslint:target'
+  ])
+
+  grunt.registerTask('cssminify', [
+    'cssmin:target'
+  ])
+
   grunt.registerTask('test', [
     'mochaTest'
   ]);
 
   grunt.registerTask('build', [
+
+    'uglify',
+    'cssminify'
   ]);
 
-  grunt.registerTask('upload', function(n) {
+  grunt.registerTask('upload', function (n) {
     if (grunt.option('prod')) {
       // add your production server task here
+      grunt.task.run([
+        'eslint-js',
+        'test'
+      ]);
     } else {
-      grunt.task.run([ 'server-dev' ]);
+      grunt.task.run(['server-dev']);
     }
   });
 
   grunt.registerTask('deploy', [
     // add your deploy tasks here
+    grunt.task.run([
+      'build'
+    ])
   ]);
 
 
